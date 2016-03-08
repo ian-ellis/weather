@@ -1,0 +1,51 @@
+evaluationDependsOn ':Weather'
+def weatherBuildTask = ":Weather:compileDebugSources"
+def weatherClassBase = '../Weather/build/intermediates/classes/debug'
+
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+
+sourceSets {
+  test {
+    java.srcDirs += "/src/test/java"
+  }
+}
+test {
+  dependsOn "$weatherBuildTask"
+}
+
+dependencies {
+  testCompile files("$weatherClassBase")
+  testCompile 'junit:junit:4.12'
+  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+  testCompile "org.jetbrains.spek:spek:$spek_version"
+
+
+  testCompile "io.reactivex:rxjava:$rx_java_version"
+//  testCompile "io.reactivex:rxandroid:$rx_android_version"
+
+  testCompile "com.squareup.retrofit2:retrofit:$retro_fit_version"
+  testCompile "com.squareup.retrofit2:converter-gson:$retro_fit_version"
+  testCompile "com.squareup.retrofit2:adapter-rxjava:$retro_fit_version"
+}
+buildscript {
+
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+repositories {
+  mavenCentral()
+  maven {
+    url "http://repository.jetbrains.com/simple/spek"
+  }
+}
