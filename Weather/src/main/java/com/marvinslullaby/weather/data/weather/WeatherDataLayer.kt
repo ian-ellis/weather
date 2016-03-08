@@ -1,4 +1,4 @@
-package com.marvinslullaby.weather.data
+package com.marvinslullaby.weather.data.weather
 
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
@@ -22,9 +22,27 @@ class WeatherDataLayer {
   }
 
 
-  fun getWeatherForCity(city:String, countryCode:String):Observable<WeatherInfomation> {
+  fun getWeatherForCity(city:String):Observable<WeatherInfomation> {
     return service.getWeatherForCity(hashMapOf(
-      Pair("q", "$city,$countryCode"),
+      Pair("q", "$city"),
+      Pair("appId", APPID)
+    )).subscribeOn(Schedulers.io())
+  }
+
+  fun getWeatherForZip(zip:String, countryCode:String):Observable<WeatherInfomation> {
+    return service.getWeatherForCity(hashMapOf(
+      Pair("zip", "$zip,$countryCode"),
+      Pair("appId", APPID)
+    )).subscribeOn(Schedulers.io())
+  }
+
+  fun getWeatherForGps():Observable<WeatherInfomation> {
+    val lat = ""
+    val lon = ""
+
+    return service.getWeatherForCity(hashMapOf(
+      Pair("lat", lat),
+      Pair("lon", lon),
       Pair("appId", APPID)
     )).subscribeOn(Schedulers.io())
   }

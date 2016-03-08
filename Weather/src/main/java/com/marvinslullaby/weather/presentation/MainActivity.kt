@@ -1,17 +1,18 @@
-package com.marvinslullaby.weather
+package com.marvinslullaby.weather.presentation
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import com.marvinslullaby.weather.data.WeatherDataLayer
+import com.marvinslullaby.weather.R
+import com.marvinslullaby.weather.data.weather.WeatherDataLayer
 import rx.android.schedulers.AndroidSchedulers
 
 
 class MainActivity : AppCompatActivity() {
 
-  protected val dataLayer:WeatherDataLayer = WeatherDataLayer()
+  protected val dataLayer: WeatherDataLayer = WeatherDataLayer()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -20,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     setSupportActionBar(toolbar)
 
 
-    dataLayer.getWeatherForCity("Sydney","AU").observeOn(AndroidSchedulers.mainThread()).subscribe({
+    dataLayer.getWeatherForCity("Sydney").observeOn(AndroidSchedulers.mainThread()).subscribe({
       val woot = ""
     },{
       val yeah = ""

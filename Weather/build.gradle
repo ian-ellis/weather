@@ -11,6 +11,7 @@ android {
     targetSdkVersion 23
     versionCode 1
     versionName "1.0"
+    testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
   }
   buildTypes {
     release {
@@ -33,6 +34,12 @@ repositories {
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
 
+  androidTestCompile 'junit:junit:4.12'
+  androidTestCompile 'com.android.support.test:runner:0.4.1'
+  androidTestCompile 'com.android.support.test:rules:0.4.1'
+  androidTestCompile "com.android.support:appcompat-v7:$support_lib_version"
+  androidTestCompile "com.android.support:design:$support_lib_version"
+
   compile 'junit:junit:4.12'
 
   compile "com.android.support:appcompat-v7:$support_lib_version"
@@ -47,6 +54,10 @@ dependencies {
   compile "com.squareup.retrofit2:converter-gson:$retro_fit_version"
   compile "com.squareup.retrofit2:adapter-rxjava:$retro_fit_version"
 
+}
+
+kapt {
+  generateStubs = true
 }
 
 buildscript {

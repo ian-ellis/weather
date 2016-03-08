@@ -1,4 +1,4 @@
-package com.marvinslullaby.weather.data
+package com.marvinslullaby.weather.data.weather
 
 import retrofit2.http.GET
 import retrofit2.http.QueryMap

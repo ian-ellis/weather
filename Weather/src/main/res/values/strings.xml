@@ -1,4 +1,7 @@
 <resources>
   <string name="app_name">weather</string>
   <string name="action_settings">Settings</string>
+
+  <string name="temp_celcius">%1$s &#8451;</string>
+  <string name="humidity">%1$s &#37;</string>
 </resources>

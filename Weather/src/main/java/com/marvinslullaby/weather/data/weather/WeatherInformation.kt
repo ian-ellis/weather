@@ -1,14 +1,14 @@
-package com.marvinslullaby.weather.data
+package com.marvinslullaby.weather.data.weather
 
 class WeatherInfomation() {
   lateinit var coords: WeatherCoords
   lateinit var weather: List<WeatherData>
   lateinit var base: String
-  lateinit var main:WeatherMain
-  lateinit var wind:WeatherWind
-  lateinit var clouds:WeatherClouds
+  lateinit var main: WeatherMain
+  lateinit var wind: WeatherWind
+  lateinit var clouds: WeatherClouds
   var dt:Int = 0
-  lateinit var sys:WeatherSystem
+  lateinit var sys: WeatherSystem
   var id:Int = 0
   lateinit var name:String
   var cod:Int = 0
