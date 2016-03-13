@@ -1,5 +1,8 @@
 package com.marvinslullaby.weather.data.weather
+import android.content.Context
+import android.content.res.Resources
 import android.location.Location
+import com.marvinslullaby.weather.R
 import com.marvinslullaby.weather.data.location.LocationDataLayer
 import com.marvinslullaby.weather.data.location.LocationNotFoundException
 import rx.Observable
@@ -13,11 +16,18 @@ class WeatherDataLayerTest extends Specification {
     TestSubscriber subscriber
     LocationDataLayer locationDataLayer
     WeatherService service
-
+    Context context
+    String defaultCountryCode = "au"
     def setup(){
+      context = Mock(Context){}
+
+      def resources = Mock(Resources)
+      resources.getString(R.string.default_country_code) >> "au"
+      context.getResources() >> resources
+
       locationDataLayer = Mock LocationDataLayer
       service = Mock(WeatherService)
-      dataLayer = new WeatherDataLayer(locationDataLayer,service)
+      dataLayer = new WeatherDataLayer(context,locationDataLayer,service)
       subscriber = new TestSubscriber()
     }
 
@@ -40,7 +50,6 @@ class WeatherDataLayerTest extends Specification {
   def 'getWeatherForZip() - queries service for weather'(){
     given: 'a zip code'
     def zip = "2000"
-    def countryCode = "au"
     def weather = Mock WeatherInformation
 
     when: 'we get weather for that zip code'
@@ -48,7 +57,7 @@ class WeatherDataLayerTest extends Specification {
     subscriber.awaitTerminalEvent(1,TimeUnit.SECONDS)
 
     then:'we make a call to the service with the correct parameters'
-    1 * service.getWeatherInformation([zip:"$zip,$countryCode", appId:WeatherDataLayer.APP_ID]) >> Observable.just(weather)
+    1 * service.getWeatherInformation([zip:"$zip,$defaultCountryCode", appId:WeatherDataLayer.APP_ID]) >> Observable.just(weather)
     subscriber.onNextEvents.size() == 1
     subscriber.onNextEvents[0] == weather
   }

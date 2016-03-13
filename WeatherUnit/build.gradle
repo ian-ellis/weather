@@ -1,7 +1,8 @@
 evaluationDependsOn ':Weather'
 
-def weatherClassBase = '../Weather/build/intermediates/classes/debug'
 def weatherBuildTask = ":Weather:compileDebugSources"
+def weatherUnitCompileTask = ":WeatherUnit:compileTestGroovy"
+def weatherClassBase = "../Weather/build/intermediates/classes/debug"
 
 
 
@@ -12,7 +13,7 @@ for (def plugin in [
   apply plugin: plugin
 }
 
-
+//
 
 sourceSets {
   test {
@@ -21,32 +22,30 @@ sourceSets {
 }
 
 test {
-  dependsOn "$weatherBuildTask"
+  dependsOn "$weatherBuildTask", "$weatherUnitCompileTask"
 
 }
 
-// needs to have an explicit dependency on airwaysBuildTask.
-// test's transient dependency on it doesn't seem to be enough
 check.dependsOn "$weatherBuildTask", 'test'
 
 dependencies {
-  compile files("$weatherClassBase")
+  compile project(':Weather')
+  testCompile files("$weatherClassBase")
+  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"
+  testCompile "io.reactivex:rxjava:${rx_java_version}"
+  testCompile 'cglib:cglib-nodep:3.1'
+  testCompile 'org.codehaus.groovy:groovy-all:2.4.1'
+  testCompile 'org.objenesis:objenesis:2.1'
+  testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+  testCompile 'junit:junit:4.12'
+  testCompile 'com.google.code.gson:gson:2.3.1'
+  testCompile 'com.google.android:android:4.1.1.4'
+  testCompile 'org.powermock:powermock-module-junit4:1.6.2'
+  testCompile 'org.powermock:powermock-module-junit4-rule:1.6.2'
+  testCompile 'org.powermock:powermock-api-mockito:1.6.2'
+  testCompile 'org.powermock:powermock-classloading-xstream:1.6.2'
 
-  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version",
-    "io.reactivex:rxjava:${rx_java_version}",
-    'cglib:cglib-nodep:3.1',
-    'org.codehaus.groovy:groovy-all:2.4.1',
-    'org.objenesis:objenesis:2.1',
-    'org.spockframework:spock-core:1.0-groovy-2.4',
-
-    'junit:junit:4.12',
-    'com.google.code.gson:gson:2.3.1',
-    'com.google.android:android:4.1.1.4',
-    'org.powermock:powermock-module-junit4:1.6.2',
-    'org.powermock:powermock-module-junit4-rule:1.6.2',
-    'org.powermock:powermock-api-mockito:1.6.2',
-    'org.powermock:powermock-classloading-xstream:1.6.2',
-    "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"
 
 }
 

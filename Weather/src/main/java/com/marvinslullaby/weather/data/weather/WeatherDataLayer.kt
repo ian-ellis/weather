@@ -1,6 +1,7 @@
 package com.marvinslullaby.weather.data.weather
 
 import android.content.Context
+import com.marvinslullaby.weather.R
 import com.marvinslullaby.weather.data.location.LocationDataLayer
 import com.marvinslullaby.weather.data.location.LocationDataLayerImplementation
 import com.marvinslullaby.weather.data.location.LocationNotFoundException
@@ -8,7 +9,7 @@ import com.marvinslullaby.weather.network.ServiceFactory
 import rx.Observable
 import rx.schedulers.Schedulers
 
-open class WeatherDataLayer(val locationDataLayer: LocationDataLayer,val service:WeatherService) {
+open class WeatherDataLayer(val context:Context, val locationDataLayer: LocationDataLayer,val service:WeatherService) {
 
   companion object {
     @JvmStatic val APP_ID: String = "95d190a434083879a6398aafd54d9e73"
@@ -16,7 +17,7 @@ open class WeatherDataLayer(val locationDataLayer: LocationDataLayer,val service
     fun newInstance(context:Context):WeatherDataLayer{
       val service = ServiceFactory.createService(WeatherService::class.java,WeatherService.ENDPOINT)
       val locationDataLayer = LocationDataLayerImplementation(context)
-      return WeatherDataLayer(locationDataLayer,service)
+      return WeatherDataLayer(context,locationDataLayer,service)
     }
   }
 
@@ -28,7 +29,7 @@ open class WeatherDataLayer(val locationDataLayer: LocationDataLayer,val service
   }
 
   open fun getWeatherForZip(zip: String): Observable<WeatherInformation> {
-    val countryCode = getCountryCodeForZip(zip)
+    val countryCode = getCountryCodeForZip()
     return service.getWeatherInformation(hashMapOf(
       Pair("zip", "$zip,$countryCode"),
       Pair("appId", APP_ID)
@@ -49,8 +50,7 @@ open class WeatherDataLayer(val locationDataLayer: LocationDataLayer,val service
     }
   }
 
-
-  protected fun getCountryCodeForZip(zip: String): String {
-    return "au"
+  protected fun getCountryCodeForZip(): String {
+    return context.resources.getString(R.string.default_country_code)
   }
 }

@@ -1,0 +1,4 @@
+<resources>
+  <string name="app_name">Aussie Weather</string>
+  <string name="default_country_code">au</string>
+</resources>

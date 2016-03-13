@@ -1,0 +1,4 @@
+<resources>
+  <string name="app_name">Canadian Eh Weather</string>
+  <string name="default_country_code">ca</string>
+</resources>
