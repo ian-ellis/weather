@@ -18,6 +18,7 @@ class WeatherDataLayerTest extends Specification {
     WeatherService service
     Context context
     String defaultCountryCode = "au"
+
     def setup(){
       context = Mock(Context){}
 

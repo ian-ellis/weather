@@ -23,33 +23,33 @@ android {
     main.java.srcDirs += 'src/main/kotlin'
   }
 
-//  productFlavors {
-//    defaultConfig {
-//      applicationId "com.marvinslullaby.weather"
-//      minSdkVersion 22
-//      targetSdkVersion 23
-//      versionCode 1
-//      versionName "1.0"
-//      testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-//    }
-//    aussie {
-//      applicationId "com.marvinslullaby.weather.au"
-//      minSdkVersion 22
-//      targetSdkVersion 23
-//      versionCode 1
-//      versionName "1.0"
-//      testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-//    }
-//
-//    canadian {
-//      applicationId "com.marvinslullaby.weather.ca"
-//      minSdkVersion 22
-//      targetSdkVersion 23
-//      versionCode 1
-//      versionName "1.0"
-//      testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-//    }
-//  }
+  productFlavors {
+    defaultConfig {
+      applicationId "com.marvinslullaby.weather"
+      minSdkVersion 22
+      targetSdkVersion 23
+      versionCode 1
+      versionName "1.0"
+      testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+    aussie {
+      applicationId "com.marvinslullaby.weather.au"
+      minSdkVersion 22
+      targetSdkVersion 23
+      versionCode 1
+      versionName "1.0"
+      testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+
+    canadian {
+      applicationId "com.marvinslullaby.weather.ca"
+      minSdkVersion 22
+      targetSdkVersion 23
+      versionCode 1
+      versionName "1.0"
+      testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+  }
 }
 repositories {
 
