@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
-  <EditText
+  xmlns:tools="http://schemas.android.com/tools">
+  <com.marvinslullaby.weather.presentation.FocusEditText
     android:id="@+id/edt_search"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    android:layout_marginRight="100dp"
-    android:layout_centerVertical="true"
     android:inputType="text"
     android:singleLine="true"
+
+    android:hint="@string/search_hint"
     android:imeOptions="actionDone"/>
 
-  <View android:layout_width="match_parent"
+  <View
+    android:layout_width="match_parent"
     android:layout_height="1dp"
     android:background="@color/divider.grey"
-    android:layout_alignParentBottom="true"/>
+    />
 
   <android.support.v7.widget.RecyclerView
     android:id="@+id/recycler_search_options"
+
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="56dp"
-    android:visibility="gone"/>
+    android:layout_height="200dp"
+    android:background="#FFFFFF"
+    android:visibility="gone"
+    tools:visibility="visible"
+  />
 </merge>

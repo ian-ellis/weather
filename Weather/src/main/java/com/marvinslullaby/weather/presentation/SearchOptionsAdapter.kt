@@ -14,6 +14,8 @@ import com.marvinslullaby.weather.data.search.SearchTerm
 class SearchOptionsAdapter : RecyclerView.Adapter<SearchOptionsAdapter.SearchViewHolder>(){
 
   var deleteAction:((SearchTerm)->Unit)? = null
+  var selectedAction:((SearchTerm)->Unit)? = null
+
   private var data:List<SearchTerm> = listOf()
 
   fun update(data:List<SearchTerm>){
@@ -30,7 +32,7 @@ class SearchOptionsAdapter : RecyclerView.Adapter<SearchOptionsAdapter.SearchVie
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchViewHolder {
     val inflater = parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as android.view.LayoutInflater
-    val v = inflater.inflate(R.layout.recycler_search_term,parent,true)
+    val v = inflater.inflate(R.layout.recycler_search_term,parent,false)
     return SearchViewHolder(v)
 
   }
@@ -71,6 +73,12 @@ class SearchOptionsAdapter : RecyclerView.Adapter<SearchOptionsAdapter.SearchVie
       deleteBtn.setOnClickListener {
         deleteAction?.invoke(searchTerm)
       }
+
+      view.setOnClickListener {
+        selectedAction?.invoke(searchTerm)
+      }
+
+
 
     }
   }

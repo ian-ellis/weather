@@ -1,5 +1,7 @@
 package com.marvinslullaby.weather.data.weather
 
+import com.google.gson.annotations.SerializedName
+
 open class WeatherInformation() {
   open lateinit var coords: WeatherCoords
   open lateinit var weather: List<WeatherData>
@@ -31,8 +33,12 @@ open class WeatherMain() {
   open var pressure: Double = 0.0
   open var humidity: Int = 0
 
+  @SerializedName("temp_min")
   open var minTemp:Double = 0.0
+
+  @SerializedName("temp_max")
   open var maxTemp:Double = 0.0
+
   open var sealevel:Double = 0.0
   open var groundLevel:Double = 0.0
 }

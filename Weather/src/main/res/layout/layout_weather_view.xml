@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:padding="32dp">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <TextView
-    android:id="@+id/txt_temp"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentStart="true"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+  <ProgressBar
+    android:id="@+id/progress"
+    android:layout_width="64dp"
+    android:layout_height="64dp"
+    android:indeterminate="true"
+    android:layout_centerInParent="true"/>
 
-  <LinearLayout
+  <com.marvinslullaby.weather.presentation.WeatherInfoView
+    android:id="@+id/view_weather_info"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/toolbar_height">
+    android:layout_height="match_parent"/>
+
+  <com.marvinslullaby.weather.presentation.WeatherErrorView
+    android:id="@+id/view_weather_error"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:layout_centerInParent="true" />
 
 
-  </LinearLayout>
 
-</RelativeLayout>
+</merge>

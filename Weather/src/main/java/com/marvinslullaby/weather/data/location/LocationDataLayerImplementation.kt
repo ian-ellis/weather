@@ -28,7 +28,7 @@ class LocationDataLayerImplementation(val context: Context):
   protected val googleApiClient: GoogleApiClient
   protected val locationManager: LocationManager?
   protected val locationBehaviour = BehaviorSubject.create<Location?>()
-  protected val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+
 
   init {
     googleApiClient = GoogleApiClient.Builder(context)
@@ -94,7 +94,7 @@ class LocationDataLayerImplementation(val context: Context):
   }
 
   protected fun hasLocationPermissions():Boolean{
-    return !permissions.map {
+    return !LocationDataLayer.getPermissions().map {
       selfPermissionGranted(it)
     }.contains(false)
 

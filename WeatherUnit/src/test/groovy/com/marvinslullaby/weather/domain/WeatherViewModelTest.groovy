@@ -1,5 +1,4 @@
 package com.marvinslullaby.weather.domain
-
 import android.content.Context
 import android.content.res.Resources
 import com.marvinslullaby.weather.R
@@ -41,10 +40,10 @@ class WeatherViewModelTest extends Specification {
     viewModel = new WeatherViewModel(context, weatherDataLayer, searchTermsDataLayer)
   }
 
-  def 'getSearchTerms() - returns search from dataLayer'() {
+  def 'getPreviousSearchTerms() - returns search from dataLayer with GPS added or moved to start'() {
     given:
     def firstTerms = [new SearchTerm.City("Sydney"), new SearchTerm.Zip("4000")]
-    def secondTerms = [new SearchTerm.City("Sydney"), new SearchTerm.Zip("4000"), new SearchTerm.City("Brisbane")]
+    def secondTerms = [new SearchTerm.City("Brisbane"),new SearchTerm.GPS(), new SearchTerm.City("Sydney"), new SearchTerm.Zip("4000")]
 
     //mock out weather data layer to never return, not of concern for this test
     mockNonCompletingWeather()
@@ -56,14 +55,14 @@ class WeatherViewModelTest extends Specification {
 
     then:
     subscriber.onNextEvents.size() == 1
-    subscriber.onNextEvents[0] == firstTerms
+    subscriber.onNextEvents[0] == [new SearchTerm.GPS(), new SearchTerm.City("Sydney"), new SearchTerm.Zip("4000")]
 
     when:
     allSearchTerms.onNext(secondTerms)
 
     then:
     subscriber.onNextEvents.size() == 2
-    subscriber.onNextEvents[1] == secondTerms
+    subscriber.onNextEvents[1] == [new SearchTerm.GPS(), new SearchTerm.City("Brisbane"), new SearchTerm.City("Sydney"), new SearchTerm.Zip("4000")]
 
   }
 
@@ -113,13 +112,14 @@ class WeatherViewModelTest extends Specification {
 
   def 'getCurrentWeather() - returns NoWeather when no previous search terms are saved'() {
     given: 'search terms have only one value (data layer adds GPS to every list)'
-    def firstTerms = [new SearchTerm.GPS()]
+    def firstTerms = []
     allSearchTerms.onNext(firstTerms)
     //mock out weather data layer to never return, not of concern for this test
     mockNonCompletingWeather()
     when:
     viewModel.go()
     viewModel.getCurrentWeather().subscribe(subscriber)
+
     then:
     subscriber.onNextEvents.size() == 1
     subscriber.onNextEvents[0] instanceof WeatherViewModel.Weather.NoWeather
@@ -128,15 +128,47 @@ class WeatherViewModelTest extends Specification {
   def 'getCurrentWeather() - returns ErrorLoadingWeather when there is an error getting weather info'() {
     given:
     def cityName = "Sydney"
-    def firstTerms = [new SearchTerm.GPS(), new SearchTerm.City(cityName)]
+    def firstTerms = [new SearchTerm.City(cityName),new SearchTerm.GPS()]
     allSearchTerms.onNext(firstTerms)
     weatherDataLayer.getWeatherForCity(cityName) >> Observable.error(new Error("Oops something went wrong"))
     when:
     viewModel.go()
     viewModel.getCurrentWeather().subscribe(subscriber)
+
     then:
     subscriber.onNextEvents.size() == 1
     subscriber.onNextEvents[0] instanceof WeatherViewModel.Weather.ErrorLoadingWeather
+  }
+
+  def 'getCurrentWeather() - can recover from an error'(){
+
+    given:
+    def weather = mockWeatherInfo()
+    def cityName = "Sydney"
+    def secondCityName = "Melbourne"
+    def firstTerms = [new SearchTerm.City(cityName), new SearchTerm.GPS()]
+    def secondTerms = [new SearchTerm.City(secondCityName), new SearchTerm.City(cityName), new SearchTerm.GPS()]
+    allSearchTerms.onNext(firstTerms)
+    weatherDataLayer.getWeatherForCity(cityName) >> Observable.error(new Error("Oops something went wrong"))
+    weatherDataLayer.getWeatherForCity(secondCityName) >> Observable.just(weather)
+
+    when:
+    viewModel.go()
+    viewModel.getCurrentWeather().subscribe(subscriber)
+
+    then:
+    subscriber.onNextEvents.size() == 1
+    subscriber.onNextEvents[0] instanceof WeatherViewModel.Weather.ErrorLoadingWeather
+
+    when:
+    allSearchTerms.onNext(secondTerms)
+
+    then:
+    subscriber.onNextEvents.size() == 3
+    subscriber.onNextEvents[1] instanceof WeatherViewModel.Weather.LoadingWeather
+    subscriber.onNextEvents[2] instanceof WeatherViewModel.Weather.WeatherDetails
+
+
   }
 
   @Unroll('getCurrentWeather() - calls data layers #expectedCall when searchTerms are #searchTerms')
@@ -173,6 +205,9 @@ class WeatherViewModelTest extends Specification {
       [gps:0,city:1,zip:0]
     ]
   }
+
+
+
 
   def 'mapInfoToDetails() - maps weather info to details'(){
     given:

@@ -59,61 +59,79 @@ class WeatherViewModel(val context: Context,
 
     subscriptions.clear()
     subscriptions.add(
-      searchTermsDataLayer.getSavedSearchTerms().map {
-        if(it.size <= 1){
-          //only GPS - so nothing previously searched
-          throw NoSearchTermsException()
-        }else{
-          it[0]
-        }
-      }.doOnNext {
+      getSearchTermsForSearch().doOnNext {
         currentWeather.onNext(Weather.LoadingWeather())
-      }.switchMap { searchTerm ->
-
-        when(searchTerm){
-          is SearchTerm.Zip -> weatherDataLayer.getWeatherForZip(searchTerm.zip)
-          is SearchTerm.City -> {
-            weatherDataLayer.getWeatherForCity(searchTerm.city)
-          }
-          is SearchTerm.GPS -> weatherDataLayer.getWeatherForGps()
-        }
-
-      }.map {
-        mapInfoToDetails(it)
-      }.onErrorReturn {
-        if(it is NoSearchTermsException){
-          Weather.NoWeather()
-        }else{
-          Weather.ErrorLoadingWeather()
-        }
+      }.switchMap { searchTerms ->
+        getWeatherForSearchTerm(searchTerms[0])
       }.subscribe ({
         currentWeather.onNext(it)
       })
     )
   }
 
-  fun search(searchValue: String) {
-    searchTermsDataLayer.add(searchValue)
-
+  fun permissionsDenied(){
+    currentWeather.onNext(Weather.ErrorLoadingWeather(Error("Permissions Denied")))
   }
 
   fun getCurrentWeather(): Observable<Weather> = currentWeather.asObservable()
-  fun getPreviousSearchTerms(): Observable<List<SearchTerm>> {
 
+  fun search(searchValue: String) {
+    searchTermsDataLayer.add(searchValue)
+  }
+
+  fun search(searchValue: SearchTerm) {
+    searchTermsDataLayer.add(searchValue)
+  }
+
+  fun delete(searchTerm:SearchTerm){
+    searchTermsDataLayer.delete(searchTerm)
+  }
+
+
+  fun getPreviousSearchTerms(): Observable<List<SearchTerm>> {
+    // re-order to have GPS always at top
     return searchTermsDataLayer.getSavedSearchTerms().map {
-      it.sortedWith(Comparator { t1, t2 ->
-        if(t1 is SearchTerm.GPS){
+      val list = mutableListOf<SearchTerm>()
+      list.addAll(it)
+      if(!list.contains(SearchTerm.GPS())){
+        list.add(SearchTerm.GPS())
+      }
+      list.distinct()
+      list.sortedWith(Comparator { t1, t2 ->
+        if (t1 is SearchTerm.GPS) {
           -1
-        }else if(t2 is SearchTerm.GPS){
+        } else if (t2 is SearchTerm.GPS) {
           1
-        }else{
+        } else {
           0
         }
       })
     }
   }
 
-  protected fun mapInfoToDetails(info: WeatherInformation): Weather {
+  private fun getWeatherForSearchTerm(searchTerm:SearchTerm):Observable<Weather>{
+    return when(searchTerm){
+      is SearchTerm.Zip -> weatherDataLayer.getWeatherForZip(searchTerm.zip)
+      is SearchTerm.City -> weatherDataLayer.getWeatherForCity(searchTerm.city)
+      is SearchTerm.GPS -> weatherDataLayer.getWeatherForGps()
+    }.map {
+      mapInfoToDetails(it)
+    }.onErrorReturn{
+      Weather.ErrorLoadingWeather(it)
+    }
+  }
+
+  private fun getSearchTermsForSearch():Observable<List<SearchTerm>>{
+    return searchTermsDataLayer.getSavedSearchTerms().doOnNext{
+      if(it.size == 0){
+        currentWeather.onNext(Weather.NoWeather())
+      }
+    }.filter{
+      it.size > 0
+    }
+  }
+
+  private fun mapInfoToDetails(info: WeatherInformation): Weather {
     val sunriseDate = Date(info.sys.sunrise.toLong())
     val sunsetDate = Date(info.sys.sunset.toLong())
     val dateFormat = SimpleDateFormat("HH:mm")
@@ -121,9 +139,9 @@ class WeatherViewModel(val context: Context,
       locationName = info.name,
       description = info.weather[0].description,
       icon = iconMap[info.weather[0].icon],
-      temperatureMax = context.resources.getString(R.string.temp_celcius, info.main.maxTemp),
-      temperatureMin = context.resources.getString(R.string.temp_celcius, info.main.minTemp),
-      humidity = context.resources.getString(R.string.humidity, info.main.humidity),
+      temperatureMax = context.resources.getString(R.string.temp_celcius, String.format("%s",info.main.maxTemp)),
+      temperatureMin = context.resources.getString(R.string.temp_celcius, String.format("%s",info.main.minTemp)),
+      humidity = context.resources.getString(R.string.humidity, String.format("%s",info.main.humidity)),
       sunrise = dateFormat.format(sunriseDate),
       sunset = dateFormat.format(sunsetDate)
 
@@ -132,8 +150,8 @@ class WeatherViewModel(val context: Context,
 
   sealed class Weather {
     class NoWeather() : Weather()
+    class ErrorLoadingWeather(val error:Throwable) : Weather()
     class LoadingWeather() : Weather()
-    class ErrorLoadingWeather() : Weather()
     class WeatherDetails(val locationName: String,
                          val description: String,
                          val icon: Int?,

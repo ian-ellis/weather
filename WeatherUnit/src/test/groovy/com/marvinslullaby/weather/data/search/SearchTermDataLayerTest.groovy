@@ -32,23 +32,7 @@ class SearchTermDataLayerTest extends Specification{
     subscriber.onNextEvents[0] == cachedValues
   }
 
-  def 'getAll() adds SearchTerm.GPS if it is not present in the database'(){
-    given: 'A cache with out a GPS search'
-    def cachedValues = [
-      new SearchTerm.City("Sydney"),
-      new SearchTerm.Zip("3000")
-    ]
-    cache.getAll() >> Observable.just(cachedValues)
 
-    when:'we ask for all search terms'
-    dataLayer.getSavedSearchTerms().subscribe(subscriber)
-
-    then:'we receive the search terms with GPS added last'
-    subscriber.onNextEvents.size() == 1
-    ((List)subscriber.onNextEvents[0]).size() == 3
-    ((List)subscriber.onNextEvents[0]).last() instanceof SearchTerm.GPS
-
-  }
 
   def 'getAll() does not add SearchTerm.GPS if it is already present in the database'(){
     given: 'A cache with out a GPS search'
@@ -77,13 +61,22 @@ class SearchTermDataLayerTest extends Specification{
     1 * cache.add(new SearchTerm.City(searchTerm))
   }
 
+  def 'add() - adds search term to DB'(){
+    given:
+    def searchTerm = new SearchTerm.City("Sydney")
+    when:
+    dataLayer.add(searchTerm)
+    then:
+    1 * cache.add(searchTerm)
+  }
+
   def 'delete() deletes data from cache'(){
     given:
-    def searchTerm = "Sydney"
+    def searchTerm = new SearchTerm.City("Sydney")
     when:
     dataLayer.delete(searchTerm)
     then:
-    1 * cache.delete(new SearchTerm.City(searchTerm))
+    1 * cache.delete(searchTerm)
 
   }
 }
