@@ -1,49 +1,56 @@
 package com.marvinslullaby.weather.data.weather
 
-import retrofit2.Retrofit
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
+import android.content.Context
+import com.marvinslullaby.weather.data.location.LocationDataLayer
+import com.marvinslullaby.weather.data.location.LocationDataLayerImplementation
+import com.marvinslullaby.weather.data.location.LocationNotFoundException
+import com.marvinslullaby.weather.network.ServiceFactory
 import rx.Observable
 import rx.schedulers.Schedulers
 
-class WeatherDataLayer {
+open class WeatherDataLayer(val locationDataLayer: LocationDataLayer,val service:WeatherService) {
 
-  val APPID:String = "95d190a434083879a6398aafd54d9e73"
+  companion object {
+    @JvmStatic val APP_ID: String = "95d190a434083879a6398aafd54d9e73"
 
-  protected val service by lazy {
-
-    val retrofit :Retrofit = Retrofit.Builder()
-      .baseUrl(WeatherService.WEATHER_SERVICE_ENDPOINT)
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .build()
-
-    retrofit.create(WeatherService::class.java);
+    fun newInstance(context:Context):WeatherDataLayer{
+      val service = ServiceFactory.createService(WeatherService::class.java,WeatherService.ENDPOINT)
+      val locationDataLayer = LocationDataLayerImplementation(context)
+      return WeatherDataLayer(locationDataLayer,service)
+    }
   }
 
-
-  fun getWeatherForCity(city:String):Observable<WeatherInfomation> {
-    return service.getWeatherForCity(hashMapOf(
+  open fun getWeatherForCity(city: String): Observable<WeatherInformation> {
+    return service.getWeatherInformation(hashMapOf(
       Pair("q", "$city"),
-      Pair("appId", APPID)
+      Pair("appId", APP_ID)
     )).subscribeOn(Schedulers.io())
   }
 
-  fun getWeatherForZip(zip:String, countryCode:String):Observable<WeatherInfomation> {
-    return service.getWeatherForCity(hashMapOf(
+  open fun getWeatherForZip(zip: String): Observable<WeatherInformation> {
+    val countryCode = getCountryCodeForZip(zip)
+    return service.getWeatherInformation(hashMapOf(
       Pair("zip", "$zip,$countryCode"),
-      Pair("appId", APPID)
+      Pair("appId", APP_ID)
     )).subscribeOn(Schedulers.io())
   }
 
-  fun getWeatherForGps():Observable<WeatherInfomation> {
-    val lat = ""
-    val lon = ""
+  open fun getWeatherForGps(): Observable<WeatherInformation> {
+    return locationDataLayer.getLocation().flatMap { location->
+      if(location == null){
+        throw LocationNotFoundException
+      }
 
-    return service.getWeatherForCity(hashMapOf(
-      Pair("lat", lat),
-      Pair("lon", lon),
-      Pair("appId", APPID)
-    )).subscribeOn(Schedulers.io())
+      service.getWeatherInformation(hashMapOf(
+        Pair("lat", location.latitude.toString()),
+        Pair("lon", location.longitude.toString()),
+        Pair("appId", APP_ID)
+      )).subscribeOn(Schedulers.io())
+    }
+  }
+
+
+  protected fun getCountryCodeForZip(zip: String): String {
+    return "au"
   }
 }

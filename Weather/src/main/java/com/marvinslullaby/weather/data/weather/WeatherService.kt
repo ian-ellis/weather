@@ -9,10 +9,10 @@ import rx.Observable
 interface WeatherService {
 
   companion object{
-    val WEATHER_SERVICE_ENDPOINT = "http://api.openweathermap.org";
+    val ENDPOINT = "http://api.openweathermap.org";
   }
 
   @GET("/data/2.5/weather")
-  fun getWeatherForCity(@QueryMap()query: HashMap<String, String>):Observable<WeatherInfomation>
+  fun getWeatherInformation(@QueryMap()query: HashMap<String, String>):Observable<WeatherInformation>
 
 }

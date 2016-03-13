@@ -1,51 +1,53 @@
 evaluationDependsOn ':Weather'
-def weatherBuildTask = ":Weather:compileDebugSources"
-def weatherClassBase = '../Weather/build/intermediates/classes/debug'
 
-apply plugin: 'java'
-apply plugin: 'kotlin'
+def weatherClassBase = '../Weather/build/intermediates/classes/debug'
+def weatherBuildTask = ":Weather:compileDebugSources"
+
+
+
+for (def plugin in [
+  'groovy',
+  'kotlin'
+]) {
+  apply plugin: plugin
+}
+
 
 
 sourceSets {
   test {
-    java.srcDirs += "/src/test/java"
+    groovy.srcDirs += "/src/test/groovy"
   }
 }
+
 test {
   dependsOn "$weatherBuildTask"
+
 }
+
+// needs to have an explicit dependency on airwaysBuildTask.
+// test's transient dependency on it doesn't seem to be enough
+check.dependsOn "$weatherBuildTask", 'test'
 
 dependencies {
-  testCompile files("$weatherClassBase")
-  testCompile 'junit:junit:4.12'
-  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  compile files("$weatherClassBase")
 
-  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-  testCompile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
-  testCompile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version",
+    "io.reactivex:rxjava:${rx_java_version}",
+    'cglib:cglib-nodep:3.1',
+    'org.codehaus.groovy:groovy-all:2.4.1',
+    'org.objenesis:objenesis:2.1',
+    'org.spockframework:spock-core:1.0-groovy-2.4',
 
-  testCompile "org.jetbrains.spek:spek:$spek_version"
+    'junit:junit:4.12',
+    'com.google.code.gson:gson:2.3.1',
+    'com.google.android:android:4.1.1.4',
+    'org.powermock:powermock-module-junit4:1.6.2',
+    'org.powermock:powermock-module-junit4-rule:1.6.2',
+    'org.powermock:powermock-api-mockito:1.6.2',
+    'org.powermock:powermock-classloading-xstream:1.6.2',
+    "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"
 
-
-  testCompile "io.reactivex:rxjava:$rx_java_version"
-//  testCompile "io.reactivex:rxandroid:$rx_android_version"
-
-  testCompile "com.squareup.retrofit2:retrofit:$retro_fit_version"
-  testCompile "com.squareup.retrofit2:converter-gson:$retro_fit_version"
-  testCompile "com.squareup.retrofit2:adapter-rxjava:$retro_fit_version"
 }
-buildscript {
 
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-  }
-}
-repositories {
-  mavenCentral()
-  maven {
-    url "http://repository.jetbrains.com/simple/spek"
-  }
-}
+

@@ -1,11 +1,21 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
+ext {
+  kotlin_version = '1.0.0'
+  spek_version = '0.1.195'
+  rx_java_version = '1.1.1'
+  rx_android_version = '1.1.0'
+  retro_fit_version = '2.0.0-beta4'
+  support_lib_version = '23.2.0'
+  play_services_version = '8.4.0'
+}
 buildscript {
   repositories {
     jcenter()
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:1.5.0'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
+
     // NOTE: Do not place your application dependencies here; they belong
     // in the individual module build.gradle files
   }
@@ -22,12 +32,5 @@ task clean(type: Delete) {
   delete rootProject.buildDir
 }
 
-ext {
-  kotlin_version = '1.0.0'
-  spek_version = '0.1.195'
-  rx_java_version = '1.1.1'
-  rx_android_version = '1.1.0'
-  retro_fit_version = '2.0.0-beta4'
-  support_lib_version = '23.2.0'
-}
+
 

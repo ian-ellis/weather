@@ -5,7 +5,7 @@ import com.marvinslullaby.weather.R
 import com.marvinslullaby.weather.data.search.SearchTerm
 import com.marvinslullaby.weather.data.search.SearchTermsDataLayer
 import com.marvinslullaby.weather.data.weather.WeatherDataLayer
-import com.marvinslullaby.weather.data.weather.WeatherInfomation
+import com.marvinslullaby.weather.data.weather.WeatherInformation
 import com.marvinslullaby.weather.utils.isNumeric
 import rx.subjects.BehaviorSubject
 import rx.Observable
@@ -18,8 +18,18 @@ import java.util.*
 
 
 class WeatherViewModel(val context: Context,
-                       val weaterDataLayer: WeatherDataLayer,
+                       val weatherDataLayer: WeatherDataLayer,
                        val searchTermsDataLayer: SearchTermsDataLayer) {
+
+  companion object {
+    fun newInstance(context:Context):WeatherViewModel{
+        return WeatherViewModel(context,
+          WeatherDataLayer.newInstance(context),
+          SearchTermsDataLayer.newInstance(context)
+        )
+
+    }
+  }
 
   private val iconMap: HashMap<String, Int> = hashMapOf(
     Pair("01d", R.drawable.ic_clear),
@@ -41,59 +51,69 @@ class WeatherViewModel(val context: Context,
     Pair("50d", R.drawable.ic_mist),
     Pair("50n", R.drawable.ic_mist)
   )
-  //output
+
   protected var currentWeather: BehaviorSubject<Weather> = BehaviorSubject.create()
-  protected var searchTerms: BehaviorSubject<SearchTerm> = BehaviorSubject.create()
-  //input
-  protected var searchTermsInput: BehaviorSubject<String> = BehaviorSubject.create()
   protected var subscriptions: CompositeSubscription = CompositeSubscription()
 
   fun go() {
 
     subscriptions.clear()
-
-    val searchTerms = searchTermsDataLayer.getSavedSearchTerms().subscribe()
-
     subscriptions.add(
       searchTermsDataLayer.getSavedSearchTerms().map {
         if(it.size <= 1){
           //only GPS - so nothing previously searched
           throw NoSearchTermsException()
         }else{
-          it[1]
+          it[0]
         }
       }.doOnNext {
         currentWeather.onNext(Weather.LoadingWeather())
       }.switchMap { searchTerm ->
 
         when(searchTerm){
-          is SearchTerm.Zip -> weaterDataLayer.getWeatherForZip(searchTerm.zip, "au")
-          is SearchTerm.City -> weaterDataLayer.getWeatherForCity(searchTerm.city)
-          is SearchTerm.GPS -> weaterDataLayer.getWeatherForGps()
+          is SearchTerm.Zip -> weatherDataLayer.getWeatherForZip(searchTerm.zip)
+          is SearchTerm.City -> {
+            weatherDataLayer.getWeatherForCity(searchTerm.city)
+          }
+          is SearchTerm.GPS -> weatherDataLayer.getWeatherForGps()
         }
 
       }.map {
         mapInfoToDetails(it)
+      }.onErrorReturn {
+        if(it is NoSearchTermsException){
+          Weather.NoWeather()
+        }else{
+          Weather.ErrorLoadingWeather()
+        }
       }.subscribe ({
         currentWeather.onNext(it)
-      }, {
-        if(it is NoSearchTermsException){
-          currentWeather.onNext(Weather.NoWeather())
-        }else{
-          currentWeather.onNext(Weather.ErrorLoadingWeather())
-        }
       })
     )
   }
 
   fun search(searchValue: String) {
-    searchTermsDataLayer.addSearchTerm(searchValue)
+    searchTermsDataLayer.add(searchValue)
+
   }
 
   fun getCurrentWeather(): Observable<Weather> = currentWeather.asObservable()
-  fun getPreviousSearchTerms(): Observable<SearchTerm> = searchTerms.asObservable()
+  fun getPreviousSearchTerms(): Observable<List<SearchTerm>> {
 
-  protected fun mapInfoToDetails(info: WeatherInfomation): Weather.WeatherDetails {
+    return searchTermsDataLayer.getSavedSearchTerms().map {
+      it.sortedWith(Comparator { t1, t2 ->
+        if(t1 is SearchTerm.GPS){
+          -1
+        }else if(t2 is SearchTerm.GPS){
+          1
+        }else{
+          0
+        }
+      })
+    }
+  }
+
+  protected fun mapInfoToDetails(info: WeatherInformation): Weather {
     val sunriseDate = Date(info.sys.sunrise.toLong())
     val sunsetDate = Date(info.sys.sunset.toLong())
     val dateFormat = SimpleDateFormat("HH:mm")
@@ -103,7 +123,7 @@ class WeatherViewModel(val context: Context,
       icon = iconMap[info.weather[0].icon],
       temperatureMax = context.resources.getString(R.string.temp_celcius, info.main.maxTemp),
       temperatureMin = context.resources.getString(R.string.temp_celcius, info.main.minTemp),
-      humidity = context.resources.getString(R.string.temp_celcius, info.main.humidity),
+      humidity = context.resources.getString(R.string.humidity, info.main.humidity),
       sunrise = dateFormat.format(sunriseDate),
       sunset = dateFormat.format(sunsetDate)
 

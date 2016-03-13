@@ -1,20 +1,38 @@
 package com.marvinslullaby.weather.data.search
 
+import android.content.Context
 import rx.Observable
 
-class SearchTermsDataLayer(val cache: SearchTermsCache) {
+open class SearchTermsDataLayer(val cache: SearchTermsCache) {
 
-  fun getSavedSearchTerms(): Observable<List<SearchTerm>> {
-    return cache.getStoredSearchTerms().map {
-      val list = mutableListOf<SearchTerm>(SearchTerm.GPS())
-      list.addAll(it)
-      list
+  companion object {
+    fun newInstance(context: Context):SearchTermsDataLayer{
+      return SearchTermsDataLayer(
+        SearchTermsCache(SearchTermSqlHelper(context))
+      )
     }
   }
 
-  fun addSearchTerm(value:String){
-    cache.addSearchTerm(value)
+  open fun getSavedSearchTerms(): Observable<List<SearchTerm>> {
+    return cache.getAll().map {
+      val list = mutableListOf<SearchTerm>()
+      list.addAll(it)
+      if(!list.contains(SearchTerm.GPS())){
+        list.add(SearchTerm.GPS())
+      }
+      list.distinct()
+    }
   }
+
+  fun add(searchTerm:String){
+    cache.add(SearchTerm.map(searchTerm))
+  }
+
+  fun delete(searchTerm:String){
+    cache.delete(SearchTerm.map(searchTerm))
+  }
+
+
 
 
 }

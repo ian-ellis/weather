@@ -43,26 +43,14 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:background="#ffffff">
 
-    <EditText
-      android:id="@+id/edt_name"
+
+    <com.marvinslullaby.weather.presentation.SearchView
+      android:id="@+id/view_search"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_margin="5dp"
-      android:layout_marginRight="100dp"
-      android:layout_centerVertical="true"
-      android:singleLine="true"/>
+      android:maxHeight="300dp" />
 
-    <View android:layout_width="match_parent"
-      android:layout_height="1dp"
-      android:background="@color/divider.grey"
-      android:layout_alignParentBottom="true"/>
 
-    <android.support.v7.widget.RecyclerView
-      android:id="@+id/recycler_search_options"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:paddingTop="56dp"
-      app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
   </LinearLayout>
 
 

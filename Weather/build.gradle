@@ -34,6 +34,14 @@ repositories {
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
 
+  testCompile 'junit:junit:4.12'
+  testCompile "org.mockito:mockito-core:1.+"
+  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+  testCompile "org.jetbrains.spek:spek:$spek_version"
+
   androidTestCompile 'junit:junit:4.12'
   androidTestCompile 'com.android.support.test:runner:0.4.1'
   androidTestCompile 'com.android.support.test:rules:0.4.1'
@@ -53,6 +61,9 @@ dependencies {
   compile "com.squareup.retrofit2:retrofit:$retro_fit_version"
   compile "com.squareup.retrofit2:converter-gson:$retro_fit_version"
   compile "com.squareup.retrofit2:adapter-rxjava:$retro_fit_version"
+  compile("com.google.android.gms:play-services-location:${play_services_version}") {
+    exclude module: 'support-v4'
+  }
 
 }
 
