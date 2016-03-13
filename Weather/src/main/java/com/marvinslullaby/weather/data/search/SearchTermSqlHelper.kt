@@ -35,7 +35,7 @@ open class SearchTermSqlHelper(context: Context)
 
     return doAsync({
       val result = mutableListOf<SearchTerm>()
-      val query = "SELECT  * FROM $TABLE_NAME ORDER BY id"
+      val query = "SELECT  * FROM $TABLE_NAME ORDER BY id DESC"
       val db = this.writableDatabase;
       val cursor = db.rawQuery(query, null);
 
